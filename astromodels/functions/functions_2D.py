@@ -28,6 +28,16 @@ class Latitude_galactic_diffuse(Function2D):
                 desc : Sigma for
                 initial value : 1
 
+            l_min :
+
+                desc : min Longtitude
+                initial value : 10
+
+            l_max :
+
+                desc : max Longtitude
+                initial value : 30
+
         """
 
     __metaclass__ = FunctionMeta
@@ -54,15 +64,34 @@ class Latitude_galactic_diffuse(Function2D):
 
         self.K.unit = z_unit
         self.sigma_b.unit = x_unit
+        self.l_min.unit = y_unit
+        self.l_max.unit = y_unit
 
-    def evaluate(self, x, y, K, sigma_b):
+    def evaluate(self, x, y, K, sigma_b, l_min, l_max):
 
         # We assume x and y are R.A. and Dec
         _coord = SkyCoord(ra=x, dec=y, frame=self._frame, unit="deg")
 
         b = _coord.transform_to('galactic').b.value
+        l = _coord.transform_to('galactic').l.value
 
-        return K * np.exp(-b ** 2 / (2 * sigma_b ** 2))
+        return K * np.exp(-b ** 2 / (2 * sigma_b ** 2)) * ((l > l_min and l < l_max) or (l_min > l_max and (l > l_min or l < l_max)))
+
+    def get_boundaries(self):
+
+        max_b = self.sigma_b.max_value
+        l_min = self.l_min.value
+        l_max = self.l_max.value
+
+        _coord = SkyCoord(l=[l_min, l_min, l_max, l_max], r=[max_b * -2., max_b * 2., max_b * 2., max_b * -2.], frame="galactic", unit="deg")
+
+        # no dealing with 0 360 overflow
+        min_lat = min(_coord.transform_to("icrs").dec.value)
+        max_lat = max(_coord.transform_to("icrs").dec.value)
+        min_lon = min(_coord.transform_to("icrs").ra.value)
+        max_lon = max(_coord.transform_to("icrs").ra.value)
+
+        return (min_lon, max_lon), (min_lat, max_lat)
 
 
 class Gaussian_on_sphere(Function2D):
