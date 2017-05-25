@@ -240,3 +240,32 @@ class ExtendedSource(Source, Node):
         :return: a tuple of tuples ((min. lon, max. lon), (min lat, max lat))
         """
         return self._spatial_shape.get_boundaries()
+
+    def get_total_flux(self, energies):
+        """
+        Returns total flux of source at the given energy
+
+        :param energies: energies (array or float)
+        :return: differential flux at given and energy
+        """
+
+        # Get the differential flux from the spectral components
+
+        results = [component.shape(energies) for component in self.components.values()]
+
+        if isinstance(energies, u.Quantity):
+
+            # Slow version with units
+
+            # We need to sum like this (slower) because using np.sum will not preserve the units
+            # (thanks astropy.units)
+
+            return = sum(results)
+
+        else:
+
+            # Fast version without units, where x is supposed to be in the same units as currently defined in
+            # units.get_units()
+
+            return np.sum(results, 0)
+
