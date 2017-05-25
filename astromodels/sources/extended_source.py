@@ -260,7 +260,7 @@ class ExtendedSource(Source, Node):
             # We need to sum like this (slower) because using np.sum will not preserve the units
             # (thanks astropy.units)
 
-            return = sum(results)
+            return sum(results)
 
         else:
 
