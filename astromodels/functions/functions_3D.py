@@ -148,9 +148,10 @@ class Continuous_injection_diffusion_ellipse(Function3D):
 
         theta = np.arctan2(np.sin(ang-incl)/elongation, np.cos(ang-incl))
 
-        rdiff = np.sqrt(rdiff_a ** 2 * np.cos(theta) ** 2 + rdiff_b ** 2 * np.sin(theta) ** 2)
+        rdiffs_a, thetas = np.meshgrid(rdiff_a, angsep)
+        rdiffs_b, angseps = np.meshgrid(rdiff_b, angsep)
 
-        rdiffs, angseps = np.meshgrid(rdiff, angsep)
+        rdiffs = np.sqrt(rdiffs_a ** 2 * np.cos(thetas) ** 2 + rdiffs_b ** 2 * np.sin(thetas) ** 2)
 
         return np.power(180.0 / pi, 2) * 1.2154 / (pi * np.sqrt(pi) * rdiffs * (angseps + 0.06 * rdiffs)) * \
                np.exp(-np.power(angseps, 2) / rdiffs ** 2)
